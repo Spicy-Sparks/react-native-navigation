@@ -77,6 +77,11 @@
           commandId:(NSString *)commandId
          completion:(RNNTransitionWithComponentIdCompletionBlock)completion;
 
+- (void)setOverlayAsKeyWindow:(NSString *)componentId
+             commandId:(NSString *)commandId
+            completion:(RNNTransitionCompletionBlock)completion
+             rejection:(RNNTransitionRejectionBlock)reject;
+
 - (void)dismissOverlay:(NSString *)componentId
              commandId:(NSString *)commandId
             completion:(RNNTransitionCompletionBlock)completion

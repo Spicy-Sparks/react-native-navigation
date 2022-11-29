@@ -6,6 +6,7 @@
 
 - (void)showOverlayWindow:(UIWindow *)viewController;
 - (void)showOverlayWindowAsKeyWindow:(UIWindow *)overlayWindow;
+- (void)setOverlayAsKeyWindow:(UIViewController *)viewController;
 - (void)dismissOverlay:(UIViewController *)viewController;
 - (void)dismissAllOverlays;
 

@@ -198,6 +198,13 @@ export class Commands {
     return result;
   }
 
+  public setOverlayAsKeyWindow(componentId: string) {
+    const commandId = this.uniqueIdProvider.generate(CommandName.SetOverlayAsKeyWindow);
+    const result = this.nativeCommandsSender.setOverlayAsKeyWindow(commandId, componentId);
+    this.commandsObserver.notify(CommandName.SetOverlayAsKeyWindow, { commandId, componentId });
+    return result;
+  }
+
   public dismissOverlay(componentId: string) {
     const commandId = this.uniqueIdProvider.generate(CommandName.DismissOverlay);
     const result = this.nativeCommandsSender.dismissOverlay(commandId, componentId);

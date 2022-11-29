@@ -186,6 +186,13 @@ export class NavigationDelegate {
   /**
    * dismiss overlay by componentId
    */
+  public setOverlayAsKeyWindow(componentId: string): Promise<string> {
+    return this.concreteNavigation.setOverlayAsKeyWindow(componentId);
+  }
+
+  /**
+   * dismiss overlay by componentId
+   */
   public dismissOverlay(componentId: string): Promise<string> {
     return this.concreteNavigation.dismissOverlay(componentId);
   }

@@ -13,6 +13,7 @@ interface NativeCommandsModule {
   dismissModal(commandId: string, componentId: string, options?: object): Promise<any>;
   dismissAllModals(commandId: string, options?: object): Promise<any>;
   showOverlay(commandId: string, layout: object): Promise<any>;
+  setOverlayAsKeyWindow(commandId: string, componentId: string): Promise<any>;
   dismissOverlay(commandId: string, componentId: string): Promise<any>;
   dismissAllOverlays(commandId: string): Promise<any>;
   getLaunchArgs(commandId: string): Promise<any>;
@@ -70,6 +71,10 @@ export class NativeCommandsSender {
 
   showOverlay(commandId: string, layout: object) {
     return this.nativeCommandsModule.showOverlay(commandId, layout);
+  }
+
+  setOverlayAsKeyWindow(commandId: string, componentId: string) {
+    return this.nativeCommandsModule.setOverlayAsKeyWindow(commandId, componentId);
   }
 
   dismissOverlay(commandId: string, componentId: string) {

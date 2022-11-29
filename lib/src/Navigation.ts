@@ -260,6 +260,13 @@ export class NavigationRoot {
   }
 
   /**
+   * Set overlay as keyWindow by componentId
+   */
+  public setOverlayAsKeyWindow(componentId: string): Promise<string> {
+    return this.commands.setOverlayAsKeyWindow(componentId);
+  }
+
+  /**
    * dismiss overlay by componentId
    */
   public dismissOverlay(componentId: string): Promise<string> {

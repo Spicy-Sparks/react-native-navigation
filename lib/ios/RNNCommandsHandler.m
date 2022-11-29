@@ -20,6 +20,7 @@ static NSString *const showModal = @"showModal";
 static NSString *const dismissModal = @"dismissModal";
 static NSString *const dismissAllModals = @"dismissAllModals";
 static NSString *const showOverlay = @"showOverlay";
+static NSString *const setOverlayAsKeyWindow = @"setOverlayAsKeyWindow";
 static NSString *const dismissOverlay = @"dismissOverlay";
 static NSString *const dismissAllOverlays = @"dismissAllOverlays";
 static NSString *const mergeOptions = @"mergeOptions";
@@ -458,7 +459,7 @@ static NSString *const setDefaultOptions = @"setDefaultOptions";
       UIWindow *overlayWindow =
           [[RNNOverlayWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
       overlayWindow.rootViewController = weakOverlayVC;
-      
+
 #if TARGET_OS_TV
       [self->_mainWindow makeKeyWindow];
 #endif
@@ -475,11 +476,30 @@ static NSString *const setDefaultOptions = @"setDefaultOptions";
     }];
 
     [overlayVC render];
-    
+
 #if TARGET_OS_TV
     [self->_mainWindow makeKeyWindow];
 #endif
 
+}
+
+- (void)setOverlayAsKeyWindow:(NSString *)componentId
+             commandId:(NSString *)commandId
+            completion:(RNNTransitionCompletionBlock)completion
+             rejection:(RNNTransitionRejectionBlock)reject {
+    [self assertReady];
+    RNNAssertMainQueue();
+
+    UIViewController *viewController = [_layoutManager findComponentForId:componentId];
+    if (viewController) {
+        [_overlayManager setOverlayAsKeyWindow:viewController];
+        [_eventEmitter sendOnNavigationCommandCompletion:setOverlayAsKeyWindow commandId:commandId];
+        completion();
+    } else {
+        [RNNErrorHandler reject:reject
+                  withErrorCode:1010
+               errorDescription:@"ComponentId not found"];
+    }
 }
 
 - (void)dismissOverlay:(NSString *)componentId

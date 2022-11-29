@@ -12,6 +12,7 @@ export enum CommandName {
   PopToRoot = 'popToRoot',
   SetStackRoot = 'setStackRoot',
   ShowOverlay = 'showOverlay',
+  SetOverlayAsKeyWindow = 'setOverlayAsKeyWindow',
   DismissOverlay = 'dismissOverlay',
   DismissAllOverlays = 'dismissAllOverlays',
   GetLaunchArgs = 'getLaunchArgs',

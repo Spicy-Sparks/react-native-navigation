@@ -203,6 +203,21 @@ RCT_EXPORT_METHOD(showOverlay
     });
 }
 
+RCT_EXPORT_METHOD(setOverlayAsKeyWindow
+                  : (NSString *)commandId componentId
+                  : (NSString *)componentId resolve
+                  : (RCTPromiseResolveBlock)resolve rejecter
+                  : (RCTPromiseRejectBlock)reject) {
+    RCTExecuteOnMainQueue(^{
+      [self->_commandsHandler setOverlayAsKeyWindow:componentId
+                                   commandId:commandId
+                                  completion:^{
+                                    resolve(@(1));
+                                  }
+                                   rejection:reject];
+    });
+}
+
 RCT_EXPORT_METHOD(dismissOverlay
                   : (NSString *)commandId componentId
                   : (NSString *)componentId resolve

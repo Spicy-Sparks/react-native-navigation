@@ -106,6 +106,10 @@ export class NativeCommandsSender {
     layoutNode.componentDidAppear();
   }
 
+  setOverlayAsKeyWindow(_commandId: string, componentId: string) {
+    LayoutStore.setOverlayAsKeyWindow(componentId);
+  }
+
   dismissOverlay(_commandId: string, componentId: string) {
     LayoutStore.dismissOverlay(componentId);
   }

@@ -52,6 +52,7 @@ const setters = remx.setters({
   showOverlay(overlay: ParentNode) {
     state.overlays.push(overlay);
   },
+  setOverlayAsKeyWindow(_overlayId: string) {},
   dismissOverlay(overlayId: string) {
     _.remove(state.overlays, (overlay: ParentNode) => overlay.nodeId === overlayId);
   },
