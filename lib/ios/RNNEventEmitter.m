@@ -4,6 +4,7 @@
 @implementation RNNEventEmitter {
     NSInteger _appLaunchedListenerCount;
     BOOL _appLaunchedEventDeferred;
+    BOOL _mobileAppLaunchedEventDeferred;
 }
 
 RCT_EXPORT_MODULE();
@@ -41,6 +42,14 @@ static NSString *const BottomTabPressed = @"RNN.BottomTabPressed";
     } else {
         _appLaunchedEventDeferred = TRUE;
     }
+}
+
+- (void)sendOnMobileAppLaunched {
+    if (_appLaunchedListenerCount > 0) {
+            [self send:AppLaunched body:@{@"mobile": @TRUE}];
+        } else {
+            _mobileAppLaunchedEventDeferred = TRUE;
+        }
 }
 
 - (void)sendComponentWillAppear:(NSString *)componentId
@@ -149,6 +158,10 @@ static NSString *const BottomTabPressed = @"RNN.BottomTabPressed";
             _appLaunchedEventDeferred = FALSE;
             [self sendOnAppLaunched];
         }
+        if(_mobileAppLaunchedEventDeferred){
+            _mobileAppLaunchedEventDeferred = FALSE;
+            [self sendOnMobileAppLaunched];
+       }
     }
 }
 
