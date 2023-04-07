@@ -52,6 +52,7 @@ public class ModalPresenter {
         appearing.setWaitForRender(enterAnimationOptions.waitForRender);
         modalsLayout.setVisibility(View.VISIBLE);
         modalsLayout.addView(appearing.getView(), matchParentLP());
+        modalsLayout.bringToFront();
 
         if (enterAnimationOptions.enabled.isTrueOrUndefined()) {
             if (enterAnimationOptions.shouldWaitForRender().isTrue()) {
