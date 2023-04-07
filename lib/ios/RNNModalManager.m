@@ -186,7 +186,18 @@
 }
 
 - (UIViewController *)rootViewController {
-    return UIApplication.sharedApplication.delegate.window.rootViewController;
+    NSArray *allWindows = [[UIApplication sharedApplication] windows];
+    UIWindow *topWindow = nil;
+    CGFloat highestWindowLevel = -CGFLOAT_MAX;
+
+    for (UIWindow *window in allWindows) {
+        if (window.windowLevel > highestWindowLevel) {
+            topWindow = window;
+            highestWindowLevel = window.windowLevel;
+        }
+    }
+    
+    return topWindow.rootViewController;
 }
 
 - (UIViewController *)topPresentedVC {
