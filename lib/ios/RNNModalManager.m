@@ -21,6 +21,11 @@
     self = [super init];
     _pendingModalIdsToDismiss = [[NSMutableArray alloc] init];
     _presentedModals = [[NSMutableArray alloc] init];
+    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+       [center addObserver:self selector:@selector(appWillResignActive) name:UIApplicationWillResignActiveNotification object:nil];
+       [center addObserver:self selector:@selector(appDidBecomeActive) name:UIApplicationDidBecomeActiveNotification object:nil];
+       [center addObserver:self selector:@selector(appDidEnterBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+       [center addObserver:self selector:@selector(appWillEnterForeground) name:UIApplicationWillEnterForegroundNotification object:nil];
     return self;
 }
 
@@ -59,6 +64,10 @@
 
         viewController.transitioningDelegate = _showModalTransitionDelegate;
     }
+    
+    UIModalPresentationStyle presentationStyle = viewController.modalPresentationStyle;
+    BOOL isSheet = (presentationStyle == UIModalPresentationFormSheet) || (presentationStyle == UIModalPresentationPageSheet);
+    [self animateRootWindow:[NSNumber numberWithBool:isSheet]];
 
     [topVC presentViewController:viewController
                         animated:animated
@@ -95,6 +104,8 @@
 
             root.presentedViewController.transitioningDelegate = _dismissModalTransitionDelegate;
         }
+        
+        [self animateRootWindow:[NSNumber numberWithBool:FALSE]];
 
         [root dismissViewControllerAnimated:animated completion:completion];
         [_eventHandler dismissedMultipleModals:_presentedModals];
@@ -105,6 +116,7 @@
 }
 
 - (void)reset {
+    [self animateRootWindow:[NSNumber numberWithBool:FALSE]];
     [_presentedModals removeAllObjects];
     [_pendingModalIdsToDismiss removeAllObjects];
 }
@@ -137,6 +149,9 @@
     }
 
     if ((modalToDismiss == topPresentedVC || [topPresentedVC findViewController:modalToDismiss])) {
+        
+        [self animateRootWindow:[NSNumber numberWithBool:FALSE]];
+        
         [self dismissSearchController:modalToDismiss];
         [modalToDismiss
             dismissViewControllerAnimated:animated
@@ -170,11 +185,13 @@
 
 - (void)dismissedModal:(UIViewController *)viewController {
     [_presentedModals removeObject:[viewController topMostViewController]];
+    [self animateRootWindow:nil];
     [_eventHandler dismissedModal:viewController.presentedComponentViewController];
 }
 
 - (void)presentationControllerDidDismiss:(UIPresentationController *)presentationController {
     [_presentedModals removeObject:presentationController.presentedViewController];
+    [self animateRootWindow:nil];
     [_eventHandler dismissedModal:presentationController.presentedViewController
                                       .presentedComponentViewController];
 }
@@ -183,6 +200,34 @@
     (UIPresentationController *)presentationController {
     [_eventHandler attemptedToDismissModal:presentationController.presentedViewController
                                                .presentedComponentViewController];
+}
+
+- (void)animateRootWindow:(NSNumber *)willOpenModal {
+    BOOL openingModal;
+    if (willOpenModal != nil) {
+        openingModal = [willOpenModal boolValue];
+    } else {
+        openingModal = (_presentedModals.count > 0);
+    }
+    
+    UIWindow *rootWindow = UIApplication.sharedApplication.delegate.window;
+    rootWindow.rootViewController.view.clipsToBounds = YES;
+    rootWindow.layer.masksToBounds = YES;
+    
+    if(openingModal) {
+        [UIView animateWithDuration:0.25 animations:^{
+            // Set the transform property of your window's view to scale down to 0.1 times its size
+            rootWindow.transform = CGAffineTransformMakeScale(0.89, 0.89);
+            rootWindow.rootViewController.view.layer.cornerRadius = 10;
+        }];
+    }
+    else {
+        [UIView animateWithDuration:0.25 animations:^{
+            // Set the transform property of your window's view to scale down to 0.1 times its size
+            rootWindow.transform = CGAffineTransformMakeScale(1, 1);
+            rootWindow.rootViewController.view.layer.cornerRadius = 0;
+        }];
+    }
 }
 
 - (UIViewController *)rootViewController {
@@ -220,6 +265,22 @@
     }
 
     return topParent;
+}
+
+- (void)appWillResignActive {
+    [self animateRootWindow:nil];
+}
+
+- (void)appDidBecomeActive {
+    [self animateRootWindow:nil];
+}
+
+- (void)appDidEnterBackground {
+    [self animateRootWindow:nil];
+}
+
+- (void)appWillEnterForeground {
+    [self animateRootWindow:nil];
 }
 
 @end
