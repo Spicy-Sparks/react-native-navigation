@@ -21,11 +21,6 @@
     self = [super init];
     _pendingModalIdsToDismiss = [[NSMutableArray alloc] init];
     _presentedModals = [[NSMutableArray alloc] init];
-    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-       [center addObserver:self selector:@selector(appWillResignActive) name:UIApplicationWillResignActiveNotification object:nil];
-       [center addObserver:self selector:@selector(appDidBecomeActive) name:UIApplicationDidBecomeActiveNotification object:nil];
-       [center addObserver:self selector:@selector(appDidEnterBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
-       [center addObserver:self selector:@selector(appWillEnterForeground) name:UIApplicationWillEnterForegroundNotification object:nil];
     return self;
 }
 
@@ -217,14 +212,14 @@
     if(openingModal) {
         [UIView animateWithDuration:0.25 animations:^{
             // Set the transform property of your window's view to scale down to 0.1 times its size
-            rootWindow.transform = CGAffineTransformMakeScale(0.89, 0.89);
+            rootWindow.rootViewController.view.transform = CGAffineTransformMakeScale(0.89, 0.89);
             rootWindow.rootViewController.view.layer.cornerRadius = 10;
         }];
     }
     else {
         [UIView animateWithDuration:0.25 animations:^{
             // Set the transform property of your window's view to scale down to 0.1 times its size
-            rootWindow.transform = CGAffineTransformMakeScale(1, 1);
+            rootWindow.rootViewController.view.transform = CGAffineTransformMakeScale(1, 1);
             rootWindow.rootViewController.view.layer.cornerRadius = 0;
         }];
     }
@@ -265,22 +260,6 @@
     }
 
     return topParent;
-}
-
-- (void)appWillResignActive {
-    [self animateRootWindow:nil];
-}
-
-- (void)appDidBecomeActive {
-    [self animateRootWindow:nil];
-}
-
-- (void)appDidEnterBackground {
-    [self animateRootWindow:nil];
-}
-
-- (void)appWillEnterForeground {
-    [self animateRootWindow:nil];
 }
 
 @end
