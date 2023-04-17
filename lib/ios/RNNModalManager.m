@@ -4,6 +4,7 @@
 #import "ScreenAnimationController.h"
 #import "ScreenReversedAnimationController.h"
 #import "UIViewController+LayoutProtocol.h"
+#import "RNNOverlayWindow.h"
 
 @interface RNNModalManager ()
 @property(nonatomic, strong) ScreenAnimationController *showModalTransitionDelegate;
@@ -231,7 +232,7 @@
     CGFloat highestWindowLevel = -CGFLOAT_MAX;
 
     for (UIWindow *window in allWindows) {
-        if (window.windowLevel > highestWindowLevel) {
+        if ((window.windowLevel > highestWindowLevel) && ([window isKindOfClass:[UIWindow class]] || [window isKindOfClass:[RNNOverlayWindow class]])) {
             topWindow = window;
             highestWindowLevel = window.windowLevel;
         }
