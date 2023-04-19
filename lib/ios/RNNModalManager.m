@@ -229,14 +229,15 @@
 - (UIViewController *)rootViewController {
     NSArray *allWindows = [[UIApplication sharedApplication] windows];
     UIWindow *topWindow = nil;
-    CGFloat highestWindowLevel = -CGFLOAT_MAX;
 
     for (UIWindow *window in allWindows) {
-        if ((window.windowLevel > highestWindowLevel) && ([window isKindOfClass:[UIWindow class]] || [window isKindOfClass:[RNNOverlayWindow class]])) {
+        if ([window isKindOfClass:[RNNOverlayWindow class]]) {
             topWindow = window;
-            highestWindowLevel = window.windowLevel;
         }
     }
+    
+    if(topWindow == nil)
+        topWindow = UIApplication.sharedApplication.delegate.window;
     
     return topWindow.rootViewController;
 }
