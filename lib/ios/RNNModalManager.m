@@ -62,8 +62,12 @@
     }
     
     UIModalPresentationStyle presentationStyle = viewController.modalPresentationStyle;
-    BOOL isSheet = (presentationStyle == UIModalPresentationFormSheet) || (presentationStyle == UIModalPresentationPageSheet);
+    BOOL isSheet = NO;
+    
+#if !TARGET_OS_TV
+    (presentationStyle == UIModalPresentationFormSheet) || (presentationStyle == UIModalPresentationPageSheet);
     [self animateRootWindow:[NSNumber numberWithBool:isSheet]];
+#endif
 
     [topVC presentViewController:viewController
                         animated:animated
@@ -199,6 +203,7 @@
 }
 
 - (void)animateRootWindow:(NSNumber *)willOpenModal {
+#if !TARGET_OS_TV
     BOOL openingModal;
     if (willOpenModal != nil) {
         openingModal = [willOpenModal boolValue];
@@ -224,6 +229,7 @@
             rootWindow.rootViewController.view.layer.cornerRadius = 0;
         }];
     }
+#endif
 }
 
 - (UIViewController *)rootViewController {
