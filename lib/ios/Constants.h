@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-@interface Constants : NSObject
+@interface NavConstants : NSObject
 
 + (NSDictionary *)getConstants;
 

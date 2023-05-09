@@ -1,5 +1,5 @@
 #import "RNNBridgeModule.h"
-#import "Constants.h"
+#import "NavConstants.h"
 
 @implementation RNNBridgeModule {
     RNNCommandsHandler *_commandsHandler;
@@ -255,12 +255,12 @@ RCT_EXPORT_METHOD(getNavigationConstants
                   : (RCTPromiseResolveBlock)resolve rejecter
                   : (RCTPromiseRejectBlock)reject) {
     RCTExecuteOnMainQueue(^{
-      resolve([Constants getConstants]);
+      resolve([NavConstants getConstants]);
     });
 }
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getNavigationConstantsSync) {
-    return [Constants getConstants];
+    return [NavConstants getConstants];
 }
 
 @end

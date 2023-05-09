@@ -1,7 +1,7 @@
-#import "Constants.h"
+#import "NavConstants.h"
 #import "UIViewController+LayoutProtocol.h"
 
-@implementation Constants
+@implementation NavConstants
 
 + (NSDictionary *)getConstants {
     return @{
