@@ -114,7 +114,8 @@
                   fontFamily:fontFamily
                     fontSize:fontSize
                   fontWeight:fontWeight
-                       color:fontColor];
+                       color:fontColor
+                    centered:YES];
 }
 
 - (void)setLargeTitleAttributes:(RNNLargeTitleOptions *)largeTitleOptions {
@@ -129,8 +130,8 @@
                   fontFamily:fontFamily
                     fontSize:fontSize
                   fontWeight:fontWeight
-                       color:fontColor];
-#endif
+                       color:fontColor
+                    centered:NO];
 }
 
 - (void)componentDidAppear {
