@@ -132,7 +132,6 @@
                   fontWeight:fontWeight
                        color:fontColor
                     centered:NO];
-#endif
 }
 
 - (void)componentDidAppear {
