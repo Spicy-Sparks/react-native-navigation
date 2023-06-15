@@ -59,30 +59,20 @@ public class NavigationModule extends ReactContextBaseJavaModule {
             @Override
             public void onHostPause() {
                 super.onHostPause();
-                UiUtils.runOnMainThread(() -> {
-                    if (getCurrentActivity() != null) {
-                        navigator().onHostPause();
-                    }
-                });
+                UiUtils.runOnMainThread(() -> navigator().onHostPause());
             }
 
             @Override
             public void onHostResume() {
-                if (getCurrentActivity() != null) {
-                    eventEmitter = new EventEmitter(reactContext);
-                    navigator().setEventEmitter(eventEmitter);
-                    layoutFactory.init(
+                eventEmitter = new EventEmitter(reactContext);
+                navigator().setEventEmitter(eventEmitter);
+                layoutFactory.init(
                         activity(),
                         eventEmitter,
                         navigator().getChildRegistry(),
                         ((NavigationApplication) activity().getApplication()).getExternalComponents()
-                    );
-                }
-                UiUtils.runOnMainThread(() -> {
-                   if (getCurrentActivity() != null) {
-                       navigator().onHostResume();
-                   }
-               });
+                );
+                UiUtils.runOnMainThread(() -> navigator().onHostResume());
             }
         });
     }
