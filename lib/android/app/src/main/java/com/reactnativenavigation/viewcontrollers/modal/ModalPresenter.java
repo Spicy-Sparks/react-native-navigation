@@ -1,5 +1,7 @@
 package com.reactnativenavigation.viewcontrollers.modal;
 
+import static android.view.View.LAYER_TYPE_SOFTWARE;
+
 import android.view.View;
 import android.view.ViewGroup;
 
