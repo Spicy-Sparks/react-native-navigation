@@ -8,14 +8,13 @@ import android.view.ViewGroup
 val hitRect = Rect()
 
 fun MotionEvent.coordinatesInsideView(view: View?): Boolean {
-
     var hit = false
 
-    /*if (!hit) {
+    if (!hit) {
         view ?: return false
         view.getHitRect(hitRect)
         hit = hitRect.contains(x.toInt(), y.toInt())
-    }*/
+    }
 
     if (!hit) {
         val viewGroup = (view as? ViewGroup) ?: return false
