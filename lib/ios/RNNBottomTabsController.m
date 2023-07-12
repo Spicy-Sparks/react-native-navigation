@@ -57,6 +57,7 @@
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+#if !TARGET_OS_TV
     // This hack is needed for cases when the initialized state of the tabBar should be hidden
     UINavigationController *selectedChild = self.selectedViewController;
     if ([selectedChild isKindOfClass:UINavigationController.class] &&
@@ -64,6 +65,7 @@
         [selectedChild pushViewController:UIViewController.new animated:NO];
         [selectedChild popViewControllerAnimated:NO];
     }
+#endif
 }
 
 - (void)viewDidLoad {
