@@ -18,8 +18,7 @@
 
 - (void)setSelectedTitleAttributes:(UITabBarItem *)tabItem
            selectedTitleAttributes:(NSDictionary *)selectedTitleAttributes {
-    tabItem.standardAppearance.stackedLayoutAppearance.selected.titleTextAttributes =
-        selectedTitleAttributes;
+    tabItem.standardAppearance.stackedLayoutAppearance.selected.titleTextAttributes = selectedTitleAttributes;
     tabItem.standardAppearance.compactInlineLayoutAppearance.selected.titleTextAttributes =
         selectedTitleAttributes;
     tabItem.standardAppearance.inlineLayoutAppearance.selected.titleTextAttributes =

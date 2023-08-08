@@ -1,5 +1,7 @@
 package com.reactnativenavigation.viewcontrollers.modal;
 
+import static android.view.View.LAYER_TYPE_SOFTWARE;
+
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -52,6 +54,9 @@ public class ModalPresenter {
         appearing.setWaitForRender(enterAnimationOptions.waitForRender);
         modalsLayout.setVisibility(View.VISIBLE);
         modalsLayout.addView(appearing.getView(), matchParentLP());
+        modalsLayout.bringToFront();
+        // if (android.os.Build.MANUFACTURER.toLowerCase().contains("huawei") || android.os.Build.BRAND.toLowerCase().contains("huawei"))
+        modalsLayout.setLayerType(LAYER_TYPE_SOFTWARE, null);
 
         if (enterAnimationOptions.enabled.isTrueOrUndefined()) {
             if (enterAnimationOptions.shouldWaitForRender().isTrue()) {

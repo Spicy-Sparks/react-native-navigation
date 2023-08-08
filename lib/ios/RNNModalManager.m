@@ -4,6 +4,7 @@
 #import "ScreenAnimationController.h"
 #import "ScreenReversedAnimationController.h"
 #import "UIViewController+LayoutProtocol.h"
+#import "RNNOverlayWindow.h"
 
 @interface RNNModalManager ()
 @property(nonatomic, strong) ScreenAnimationController *showModalTransitionDelegate;
@@ -59,6 +60,14 @@
 
         viewController.transitioningDelegate = _showModalTransitionDelegate;
     }
+    
+    UIModalPresentationStyle presentationStyle = viewController.modalPresentationStyle;
+    BOOL isSheet = NO;
+    
+#if !TARGET_OS_TV
+    (presentationStyle == UIModalPresentationFormSheet) || (presentationStyle == UIModalPresentationPageSheet);
+    [self animateRootWindow:[NSNumber numberWithBool:isSheet]];
+#endif
 
     [topVC presentViewController:viewController
                         animated:animated
@@ -95,6 +104,8 @@
 
             root.presentedViewController.transitioningDelegate = _dismissModalTransitionDelegate;
         }
+        
+        [self animateRootWindow:[NSNumber numberWithBool:FALSE]];
 
         [root dismissViewControllerAnimated:animated completion:completion];
         [_eventHandler dismissedMultipleModals:_presentedModals];
@@ -105,6 +116,7 @@
 }
 
 - (void)reset {
+    [self animateRootWindow:[NSNumber numberWithBool:FALSE]];
     [_presentedModals removeAllObjects];
     [_pendingModalIdsToDismiss removeAllObjects];
 }
@@ -137,6 +149,9 @@
     }
 
     if ((modalToDismiss == topPresentedVC || [topPresentedVC findViewController:modalToDismiss])) {
+        
+        [self animateRootWindow:[NSNumber numberWithBool:FALSE]];
+        
         [self dismissSearchController:modalToDismiss];
         [modalToDismiss
             dismissViewControllerAnimated:animated
@@ -170,11 +185,13 @@
 
 - (void)dismissedModal:(UIViewController *)viewController {
     [_presentedModals removeObject:[viewController topMostViewController]];
+    [self animateRootWindow:nil];
     [_eventHandler dismissedModal:viewController.presentedComponentViewController];
 }
 
 - (void)presentationControllerDidDismiss:(UIPresentationController *)presentationController {
     [_presentedModals removeObject:presentationController.presentedViewController];
+    [self animateRootWindow:nil];
     [_eventHandler dismissedModal:presentationController.presentedViewController
                                       .presentedComponentViewController];
 }
@@ -185,8 +202,50 @@
                                                .presentedComponentViewController];
 }
 
+- (void)animateRootWindow:(NSNumber *)willOpenModal {
+#if !TARGET_OS_TV
+    BOOL openingModal;
+    if (willOpenModal != nil) {
+        openingModal = [willOpenModal boolValue];
+    } else {
+        openingModal = (_presentedModals.count > 0);
+    }
+    
+    UIWindow *rootWindow = UIApplication.sharedApplication.delegate.window;
+    rootWindow.rootViewController.view.clipsToBounds = YES;
+    rootWindow.layer.masksToBounds = YES;
+    
+    if(openingModal) {
+        [UIView animateWithDuration:0.25 animations:^{
+            // Set the transform property of your window's view to scale down to 0.1 times its size
+            rootWindow.rootViewController.view.transform = CGAffineTransformMakeScale(0.89, 0.89);
+            rootWindow.rootViewController.view.layer.cornerRadius = 10;
+        }];
+    }
+    else {
+        [UIView animateWithDuration:0.25 animations:^{
+            // Set the transform property of your window's view to scale down to 0.1 times its size
+            rootWindow.rootViewController.view.transform = CGAffineTransformMakeScale(1, 1);
+            rootWindow.rootViewController.view.layer.cornerRadius = 0;
+        }];
+    }
+#endif
+}
+
 - (UIViewController *)rootViewController {
-    return UIApplication.sharedApplication.delegate.window.rootViewController;
+    NSArray *allWindows = [[UIApplication sharedApplication] windows];
+    UIWindow *topWindow = nil;
+
+    for (UIWindow *window in allWindows) {
+        if ([window isKindOfClass:[RNNOverlayWindow class]]) {
+            topWindow = window;
+        }
+    }
+    
+    if(topWindow == nil)
+        topWindow = UIApplication.sharedApplication.delegate.window;
+    
+    return topWindow.rootViewController;
 }
 
 - (UIViewController *)topPresentedVC {
