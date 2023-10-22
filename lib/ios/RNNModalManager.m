@@ -233,6 +233,9 @@
 }
 
 - (UIViewController *)rootViewController {
+#if TARGET_OS_TV
+    return UIApplication.sharedApplication.delegate.window.rootViewController;
+#else
     NSArray *allWindows = [[UIApplication sharedApplication] windows];
     UIWindow *topWindow = nil;
 
@@ -246,6 +249,7 @@
         topWindow = UIApplication.sharedApplication.delegate.window;
     
     return topWindow.rootViewController;
+#endif
 }
 
 - (UIViewController *)topPresentedVC {
