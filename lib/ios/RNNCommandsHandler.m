@@ -456,8 +456,10 @@ static NSString *const setDefaultOptions = @"setDefaultOptions";
 
     __weak UIViewController *weakOverlayVC = overlayVC;
     [overlayVC setReactViewReadyCallback:^{
-      UIWindow *overlayWindow =
-          [[RNNOverlayWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+        UIWindow *overlayWindow = [[RNNOverlayWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+        if (@available(iOS 13.0, *)) {
+            overlayWindow.windowScene = self->_mainWindow.windowScene;
+        }
       overlayWindow.rootViewController = weakOverlayVC;
 
 #if TARGET_OS_TV
@@ -532,6 +534,7 @@ static NSString *const setDefaultOptions = @"setDefaultOptions";
 #pragma mark - private
 
 - (void)assertReady {
+    _mainWindow = UIApplication.sharedApplication.delegate.window;
     if (!self.readyToReceiveCommands) {
         [[NSException exceptionWithName:@"BridgeNotLoadedError"
                                  reason:@"Bridge not yet loaded! Send commands after "

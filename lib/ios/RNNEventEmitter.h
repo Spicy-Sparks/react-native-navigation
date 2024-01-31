@@ -5,6 +5,7 @@
 @interface RNNEventEmitter : RCTEventEmitter <RCTBridgeModule>
 
 - (void)sendOnAppLaunched;
+- (void)sendOnMobileAppLaunched;
 
 - (void)sendComponentWillAppear:(NSString *)componentId
                   componentName:(NSString *)componentName
