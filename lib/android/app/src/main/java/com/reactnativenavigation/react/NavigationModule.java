@@ -235,7 +235,7 @@ public class NavigationModule extends ReactContextBaseJavaModule {
     public void invalidate() {
         final NavigationActivity navigationActivity = activity();
         if (navigationActivity != null) {
-            navigationActivity.invalidate();
+            navigationActivity.onCatalystInstanceDestroy();
         }
         super.invalidate();
     }
