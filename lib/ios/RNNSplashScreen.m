@@ -89,6 +89,14 @@
     }
 }
 
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+  if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+      return UIInterfaceOrientationMaskPortrait;
+  } else {
+      return UIInterfaceOrientationMaskAll;
+  }
+}
+
 - (UIStatusBarStyle)preferredStatusBarStyle {
     NSString *styleString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIStatusBarStyle"];
 
