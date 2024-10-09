@@ -36,6 +36,12 @@
                            presenter:presenter
                         eventEmitter:eventEmitter
                 childViewControllers:childViewControllers];
+
+    if (@available(iOS 18.0, *)) {
+        if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad)
+            self.traitOverrides.horizontalSizeClass = UIUserInterfaceSizeClassCompact;
+    }
+
     if (@available(iOS 13.0, *)) {
         self.tabBar.standardAppearance = [UITabBarAppearance new];
     }
