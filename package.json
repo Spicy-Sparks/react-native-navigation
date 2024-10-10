@@ -1,6 +1,6 @@
 {
   "name": "@spicysparks/react-native-navigation",
-  "version": "7.40.6",
+  "version": "7.40.7",
   "description": "React Native Navigation - truly native navigation for iOS and Android",
   "license": "MIT",
   "nativePackage": true,
