@@ -3,6 +3,7 @@ package com.reactnativenavigation.options;
 import android.app.Activity;
 import android.content.Context;
 
+import com.facebook.react.ReactHost;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.bridge.ReactContext;
 import com.reactnativenavigation.NavigationApplication;
@@ -50,23 +51,22 @@ import static com.reactnativenavigation.utils.CollectionUtils.*;
 import org.json.JSONObject;
 
 public class LayoutFactory {
-	private Activity activity;
+        private final ReactHost reactHost;
+        private Activity activity;
 	private ChildControllersRegistry childRegistry;
-	private final ReactInstanceManager reactInstanceManager;
 	private EventEmitter eventEmitter;
 	private Map<String, ExternalComponentCreator> externalComponentCreators;
 	private @NonNull Options defaultOptions = new Options();
 	private TypefaceLoader typefaceManager;
+	
+	public LayoutFactory(ReactHost reactHost) {
+            this.reactHost = reactHost;
+        }
 
 	public void setDefaultOptions(@NonNull Options defaultOptions) {
 		Assertions.assertNotNull(defaultOptions);
 		this.defaultOptions = defaultOptions;
 	}
-
-	public LayoutFactory(final ReactInstanceManager reactInstanceManager) {
-		this.reactInstanceManager = reactInstanceManager;
-	}
-
 	public void init(Activity activity, EventEmitter eventEmitter, ChildControllersRegistry childRegistry, Map<String, ExternalComponentCreator> externalComponentCreators) {
 		this.activity = activity;
 		this.eventEmitter = eventEmitter;
@@ -76,7 +76,7 @@ public class LayoutFactory {
 	}
 
 	public ViewController<?> create(final LayoutNode node) {
-		final ReactContext context = reactInstanceManager.getCurrentReactContext();
+		final ReactContext context = reactHost.getCurrentReactContext();
 		switch (node.type) {
 			case Component:
 				return createComponent(node);
@@ -164,7 +164,7 @@ public class LayoutFactory {
 				childRegistry,
 				id,
 				name,
-				new ComponentViewCreator(reactInstanceManager),
+				new ComponentViewCreator(),
 				parseOptions(node.getOptions()),
 				new Presenter(activity, defaultOptions),
 				new ComponentPresenter(defaultOptions)
@@ -179,7 +179,6 @@ public class LayoutFactory {
 				new Presenter(activity, defaultOptions),
 				externalComponent,
 				externalComponentCreators.get(externalComponent.name.get()),
-				reactInstanceManager,
 				new EventEmitter(context),
 				new ExternalComponentPresenter(),
 				parseOptions(node.getOptions())
@@ -187,21 +186,22 @@ public class LayoutFactory {
 	}
 
 	private ViewController<?> createStack(LayoutNode node) {
+		final TopBarController topBarController = new TopBarController();
 		return new StackControllerBuilder(activity, eventEmitter)
 				.setChildren(createChildren(node.children))
 				.setChildRegistry(childRegistry)
-				.setTopBarController(new TopBarController())
+				.setTopBarController(topBarController)
 				.setId(node.id)
 				.setInitialOptions(parseOptions(node.getOptions()))
 				.setStackPresenter(new StackPresenter(activity,
-						new TitleBarReactViewCreator(reactInstanceManager),
-						new TopBarBackgroundViewCreator(reactInstanceManager),
-						new TitleBarButtonCreator(reactInstanceManager),
+						new TitleBarReactViewCreator(),
+						new TitleBarButtonCreator(),
+						topBarController,
 						new IconResolver(activity, new ImageLoader()),
 						new TypefaceLoader(activity),
 						new RenderChecker(),
-						defaultOptions
-				))
+						defaultOptions,
+						new TopBarBackgroundViewCreator()))
 				.setPresenter(new Presenter(activity, defaultOptions))
 				.build();
 	}
@@ -243,7 +243,7 @@ public class LayoutFactory {
 	}
 
     private Options parseOptions(JSONObject jsonOptions) {
-        Context context = reactInstanceManager.getCurrentReactContext();
+        Context context = reactHost.getCurrentReactContext();
         if (context == null) {
             context = activity == null ? NavigationApplication.instance : activity;
         }

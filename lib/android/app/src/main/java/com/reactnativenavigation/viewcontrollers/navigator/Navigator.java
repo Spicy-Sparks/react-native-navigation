@@ -143,7 +143,7 @@ public class Navigator extends ParentController<ViewGroup> {
 
     }
 
-    public void setRoot(final ViewController<?> appearing, CommandListener commandListener, ReactInstanceManager reactInstanceManager) {
+    public void setRoot(final ViewController<?> appearing, CommandListener commandListener) {
         previousRoot = root;
         modalStack.destroy();
         final boolean removeSplashView = isRootNotCreated();
@@ -160,7 +160,7 @@ public class Navigator extends ParentController<ViewGroup> {
                 destroyPreviousRoot();
                 super.onSuccess(childId);
             }
-        }, reactInstanceManager);
+        });
     }
 
     public void mergeOptions(final String componentId, Options options) {
@@ -284,6 +284,9 @@ public class Navigator extends ParentController<ViewGroup> {
 
     public void onHostResume() {
         overlayManager.onHostResume();
+        if (root != null && root.getView() != null) {
+            root.getView().requestLayout();
+        }
         if (!modalStack.isEmpty()) {
             modalStack.onHostResume();
             if(modalStack.peekDisplayedOverCurrentContext()){

@@ -1,5 +1,9 @@
 package com.reactnativenavigation.viewcontrollers.bottomtabs;
 
+import static com.reactnativenavigation.utils.CollectionUtils.forEach;
+import static com.reactnativenavigation.utils.CollectionUtils.map;
+import static com.reactnativenavigation.utils.ObjectUtils.perform;
+
 import android.animation.Animator;
 import android.app.Activity;
 import android.content.Intent;
@@ -10,6 +14,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.RestrictTo;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.graphics.Insets;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
@@ -35,10 +41,6 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.reactnativenavigation.utils.CollectionUtils.forEach;
-import static com.reactnativenavigation.utils.CollectionUtils.map;
-import static com.reactnativenavigation.utils.ObjectUtils.perform;
-
 public class BottomTabsController extends ParentController<BottomTabsLayout> implements AHBottomNavigation.OnTabSelectedListener, TabSelector {
 
     private BottomTabsContainer bottomTabsContainer;
@@ -62,7 +64,15 @@ public class BottomTabsController extends ParentController<BottomTabsLayout> imp
         tabPresenter.onConfigurationChanged(resolveCurrentOptions());
     }
 
-    public BottomTabsController(Activity activity, List<ViewController<?>> tabs, ChildControllersRegistry childRegistry, EventEmitter eventEmitter, ImageLoader imageLoader, String id, Options initialOptions, Presenter presenter, BottomTabsAttacher tabsAttacher, BottomTabsPresenter bottomTabsPresenter, BottomTabPresenter bottomTabPresenter) {
+    public BottomTabsController(Activity activity,
+                                List<ViewController<?>> tabs,
+                                ChildControllersRegistry childRegistry,
+                                EventEmitter eventEmitter,
+                                ImageLoader imageLoader,
+                                String id, Options initialOptions,
+                                Presenter presenter,
+                                BottomTabsAttacher tabsAttacher,
+                                BottomTabsPresenter bottomTabsPresenter, BottomTabPresenter bottomTabPresenter) {
         super(activity, childRegistry, id, presenter, initialOptions);
         this.tabs = tabs;
         this.eventEmitter = eventEmitter;
@@ -85,17 +95,21 @@ public class BottomTabsController extends ParentController<BottomTabsLayout> imp
     @Override
     public BottomTabsLayout createView() {
         BottomTabsLayout root = new BottomTabsLayout(getActivity());
+        root.setTag("RNN.BottomTabsLayoutRoot");
+
         this.bottomTabsContainer = createBottomTabsContainer();
         this.bottomTabs = bottomTabsContainer.getBottomTabs();
         Options resolveCurrentOptions = resolveCurrentOptions();
         tabsAttacher.init(root, resolveCurrentOptions);
-        presenter.bindView(bottomTabsContainer, this);
+        presenter.bindView(bottomTabsContainer, root, this);
         tabPresenter.bindView(bottomTabs);
         bottomTabs.setOnTabSelectedListener(this);
         root.addBottomTabsContainer(bottomTabsContainer);
+
         bottomTabs.addItems(createTabs());
         setInitialTab(resolveCurrentOptions);
         tabsAttacher.attach();
+
         return root;
     }
 
@@ -275,11 +289,11 @@ public class BottomTabsController extends ParentController<BottomTabsLayout> imp
     private void selectTab(int newIndex, boolean enableSelectionHistory) {
         saveTabSelection(newIndex, enableSelectionHistory);
         tabsAttacher.onTabSelected(tabs.get(newIndex));
-        getCurrentView().setVisibility(View.INVISIBLE);
+        getCurrentChild().onDeselected();
+
+        ViewController<?> previouslyVisible = getCurrentChild();
         bottomTabs.setCurrentItem(newIndex, false);
-        getCurrentView().setVisibility(View.VISIBLE);
-        getCurrentChild().onViewWillAppear();
-        getCurrentChild().onViewDidAppear();
+        getCurrentChild().onSelected(previouslyVisible);
     }
 
     private void saveTabSelection(int newIndex, boolean enableSelectionHistory) {
@@ -289,11 +303,6 @@ public class BottomTabsController extends ParentController<BottomTabsLayout> imp
                     || bottomTabs.getCurrentItem() != newIndex)
                 selectionStack.offerFirst(bottomTabs.getCurrentItem());
         }
-    }
-
-    @NonNull
-    private ViewGroup getCurrentView() {
-        return tabs.get(bottomTabs.getCurrentItem()).getView();
     }
 
     public Animator getPushAnimation(Options appearingOptions) {
@@ -306,6 +315,16 @@ public class BottomTabsController extends ParentController<BottomTabsLayout> imp
 
     public Animator getPopAnimation(Options appearingOptions, Options disappearingOptions) {
         return presenter.getPopAnimation(appearingOptions, disappearingOptions);
+    }
+
+    @Override
+    protected WindowInsetsCompat onApplyWindowInsets(View view, WindowInsetsCompat insets) {
+        Insets sysInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+        Insets imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime());
+
+        int bottomInset = (imeInsets.bottom > 0) ? 0 : sysInsets.bottom;
+        view.setPaddingRelative(0, 0, 0, bottomInset);
+        return insets;
     }
 
     @RestrictTo(RestrictTo.Scope.TESTS)

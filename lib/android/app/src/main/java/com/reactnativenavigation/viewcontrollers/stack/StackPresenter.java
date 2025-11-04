@@ -37,6 +37,7 @@ import com.reactnativenavigation.viewcontrollers.stack.topbar.button.ButtonContr
 import com.reactnativenavigation.viewcontrollers.stack.topbar.button.ButtonPresenter;
 import com.reactnativenavigation.viewcontrollers.stack.topbar.button.IconResolver;
 import com.reactnativenavigation.viewcontrollers.stack.topbar.title.TitleBarReactViewController;
+import com.reactnativenavigation.viewcontrollers.statusbar.StatusBarPresenter;
 import com.reactnativenavigation.viewcontrollers.viewcontroller.IReactView;
 import com.reactnativenavigation.viewcontrollers.viewcontroller.ViewController;
 import com.reactnativenavigation.views.stack.topbar.TopBar;
@@ -88,15 +89,17 @@ public class StackPresenter {
     private final TypefaceLoader typefaceLoader;
 
     public StackPresenter(Activity activity,
-            TitleBarReactViewCreator titleViewCreator,
-            TopBarBackgroundViewCreator topBarBackgroundViewCreator,
-            TitleBarButtonCreator buttonCreator,
-            IconResolver iconResolver,
-            TypefaceLoader typefaceLoader,
-            RenderChecker renderChecker,
-            Options defaultOptions) {
+                          TitleBarReactViewCreator titleViewCreator,
+                          TitleBarButtonCreator buttonCreator,
+                          TopBarController topBarController,
+                          IconResolver iconResolver,
+                          TypefaceLoader typefaceLoader,
+                          RenderChecker renderChecker,
+                          Options defaultOptions,
+                          TopBarBackgroundViewCreator topBarBackgroundViewCreator) {
         this.activity = activity;
         this.titleViewCreator = titleViewCreator;
+        this.topBarController = topBarController;
         this.topBarBackgroundViewCreator = topBarBackgroundViewCreator;
         this.buttonCreator = buttonCreator;
         this.iconResolver = iconResolver;
@@ -117,8 +120,7 @@ public class StackPresenter {
         return defaultOptions;
     }
 
-    public void bindView(TopBarController topBarController, @Nullable BottomTabsController bottomTabsController) {
-        this.topBarController = topBarController;
+    public void bindView(@Nullable BottomTabsController bottomTabsController) {
         this.bottomTabsController = bottomTabsController;
         topBar = topBarController.getView();
     }
@@ -191,6 +193,12 @@ public class StackPresenter {
         componentLeftButtons.remove(child.getView());
     }
 
+    public void bindNewViewController(ViewController<?> previousVC, ViewController<?> newVC) {
+        Options options = newVC.resolveCurrentOptions(defaultOptions);
+        topBarController.bindNewViewController(previousVC, newVC);
+        StatusBarPresenter.instance.bindViewController(options.statusBar);
+    }
+
     private void destroyButtons(@Nullable Map<String, ButtonController> buttons) {
         if (buttons != null)
             forEach(buttons.values(), ViewController::destroy);
@@ -233,7 +241,7 @@ public class StackPresenter {
 
         topBar.setBorderHeight(topBarOptions.borderHeight.get(0d));
         topBar.setBorderColor(topBarOptions.borderColor.get(DEFAULT_BORDER_COLOR));
-        topBar.setBackgroundColor(topBarOptions.background.color.get(Color.WHITE));
+        topBarController.setBackgroundColor(topBarOptions, Color.WHITE);
 
         if (topBarOptions.background.component.hasValue()) {
             View createdComponent = findBackgroundComponent(topBarOptions.background.component);
@@ -417,18 +425,23 @@ public class StackPresenter {
         }
     }
 
-    public List<Animator> getAdditionalPushAnimations(StackController stack, ViewController<?> appearing,
+    public List<Animator> getAdditionalPushAnimations(
+            StackController stack,
+            ViewController<?> appearingCtrl,
             Options appearingOptions) {
         return CollectionUtils.asList(
-                topBarController.getPushAnimation(appearingOptions,
-                        getTopBarTranslationAnimationDelta(stack, appearing)),
-                perform(bottomTabsController, null, btc -> btc.getPushAnimation(appearingOptions)));
+                topBarController.getPushAnimation(appearingOptions, getTopBarTranslationAnimationDelta(stack, appearingCtrl)),
+                perform(appearingCtrl, null, vc -> vc.getPushAnimations(appearingOptions)),
+                perform(bottomTabsController, null, btc -> btc.getPushAnimation(appearingOptions)
+            ));
     }
 
-    public List<Animator> getAdditionalPopAnimations(Options appearingOptions, Options disappearingOptions) {
+    public List<Animator> getAdditionalPopAnimations(Options appearingOptions, Options disappearingOptions, ViewController<?> appearingCtrl) {
         return CollectionUtils.asList(
                 topBarController.getPopAnimation(appearingOptions, disappearingOptions),
-                perform(bottomTabsController, null, btc -> btc.getPopAnimation(appearingOptions, disappearingOptions)));
+                perform(appearingCtrl, null, vc -> vc.getPopAnimations(appearingOptions, disappearingOptions)),
+                perform(bottomTabsController, null, btc -> btc.getPopAnimation(appearingOptions, disappearingOptions)
+            ));
     }
 
     public List<Animator> getAdditionalSetRootAnimations(StackController stack, ViewController<?> appearing,
@@ -618,9 +631,7 @@ public class StackPresenter {
         if (resolveOptions.subtitle.font.hasValue()) {
             topBar.setSubtitleTypeface(typefaceLoader, resolveOptions.subtitle.font);
         }
-
-        if (topBarOptions.background.color.hasValue())
-            topBar.setBackgroundColor(topBarOptions.background.color.get());
+        topBarController.setBackgroundColor(topBarOptions);
 
         if (topBarOptions.background.component.hasValue()) {
             if (backgroundControllers.containsKey(component)) {

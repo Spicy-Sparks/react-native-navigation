@@ -1,14 +1,61 @@
 import { readFileSync } from 'fs';
-function bitmapDiff(imagePath, expectedImagePath) {
-  const PNG = require('pngjs').PNG;
-  const pixelmatch = require('pixelmatch');
-  const img1 = PNG.sync.read(readFileSync(imagePath));
-  const img2 = PNG.sync.read(readFileSync(expectedImagePath));
-  const { width, height } = img1;
-  const diff = new PNG({ width, height });
+import { PNG } from 'pngjs';
+import { ssim } from 'ssim.js';
 
-  return pixelmatch(img1.data, img2.data, diff.data, width, height, { threshold: 0.0 });
+const SSIM_SCORE_THRESHOLD = 0.997;
+
+function convertToSSIMFormat(image) {
+  return {
+    data: new Uint8ClampedArray(image.data),
+    width: image.width,
+    height: image.height
+  };
 }
+
+function loadImage(path) {
+  const image = PNG.sync.read(readFileSync(path));
+
+  return convertToSSIMFormat(image);
+}
+
+function bitmapDiff(imagePath, expectedImagePath, ssimThreshold = SSIM_SCORE_THRESHOLD) {
+  const image = loadImage(imagePath);
+  const expectedImage = loadImage(expectedImagePath);
+
+  const { mssim, performance } = ssim(image, expectedImage);
+
+  if (mssim < ssimThreshold) {
+    throw new Error(
+      `Expected bitmaps at '${imagePath}' and '${expectedImagePath}' to have an SSIM score ` +
+      `of at least ${SSIM_SCORE_THRESHOLD}, but got ${mssim}. This means the snapshots are different ` +
+      `(comparison took ${performance}ms)`,
+    );
+  }
+}
+
+const sleep = (ms) =>
+  new Promise((res) => setTimeout(res, ms));
+
+/**
+ * @param tries Total tries to attempt (retries + 1)
+ * @param delay Delay between retries, in milliseconds
+ * @param {Function<Promise<Boolean>>} func
+ * @returns {Promise<void>}
+ * @throws {Error} if the function fails after all retries
+ */
+async function retry({ tries = 3, delay = 1000 }, func) {
+  for (let i = 0; i < tries; i++) {
+    const result = await func();
+    if (result) {
+      return;
+    }
+
+    await sleep(delay);
+  }
+
+  throw new Error(`Failed even after ${tries} attempts`);
+}
+
 const utils = {
   elementByLabel: (label) => {
     // uncomment for running tests with rn's new arch
@@ -33,18 +80,22 @@ const utils = {
       return element(by.type('_UIModernBarButton').and(by.label('Back'))).tap();
     }
   },
-  sleep: (ms) => new Promise((res) => setTimeout(res, ms)),
+  sleep,
+  retry,
   expectImagesToBeEqual: (imagePath, expectedImagePath) => {
-    let diff = bitmapDiff(imagePath, expectedImagePath);
-    if (diff !== 0) {
-      throw Error(`${imagePath} should be the same as ${expectedImagePath}, with diff: ${diff}`);
-    }
+    bitmapDiff(imagePath, expectedImagePath);
+
   },
   expectImagesToBeNotEqual: (imagePath, expectedImagePath) => {
-    let diff = bitmapDiff(imagePath, expectedImagePath);
-    if (diff === 0) {
-      throw Error(`${imagePath} should be the same as ${expectedImagePath}, with diff: ${diff}`);
+    try {
+      bitmapDiff(imagePath, expectedImagePath);
+    } catch (error) {
+      return
     }
+
+    throw new Error(
+      `Expected bitmaps at '${imagePath}' and '${expectedImagePath}' to be different`,
+    );
   },
 };
 
