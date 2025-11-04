@@ -1,11 +1,12 @@
 import React from 'react';
-import { NavigationComponentProps } from 'react-native-navigation';
+import { NavigationProps } from 'react-native-navigation';
 import Root from '../components/Root';
 import Button from '../components/Button';
 import Screens from './Screens';
 import Navigation from './../services/Navigation';
 import { stack, component } from './../commons/Layouts';
 import testIDs from '../testIDs';
+import { MountedBottomTabScreensState } from './FirstBottomTabScreen';
 
 const {
   SIDE_MENU_INSIDE_BOTTOM_TABS_BTN,
@@ -20,7 +21,7 @@ const {
   STATIC_EVENTS_OVERLAY_BTN,
 } = testIDs;
 
-export default class SecondBottomTabScreen extends React.Component<NavigationComponentProps> {
+export default class SecondBottomTabScreen extends React.Component<NavigationProps> {
   static options() {
     return {
       topBar: {
@@ -38,6 +39,10 @@ export default class SecondBottomTabScreen extends React.Component<NavigationCom
         },
       },
     };
+  }
+
+  componentDidMount() {
+    MountedBottomTabScreensState.addScreen('SecondBottomTabScreen');
   }
 
   render() {

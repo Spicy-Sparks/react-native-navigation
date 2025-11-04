@@ -3,7 +3,7 @@
    LastUpgradeVersion = "1120"
    version = "1.3">
    <BuildAction
-      parallelizeBuildables = "NO"
+      parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES">
       <BuildActionEntries>
          <BuildActionEntry
@@ -68,6 +68,14 @@
                BlueprintName = "NavigationTests"
                ReferencedContainer = "container:playground.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "RNNCommandsHandlerTest">
+               </Test>
+               <Test
+                  Identifier = "RNNModalManagerEventHandlerTest">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>

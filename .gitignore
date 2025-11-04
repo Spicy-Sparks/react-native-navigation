@@ -1,6 +1,4 @@
 dist
-package-lock.json
-yarn.lock
 .history/
 
 # Docusaurus
@@ -244,3 +242,6 @@ lib/Mock/*.js
 lib/Mock/*.d.ts
 Mock.js
 Mock.d.ts
+
+Gemfile.lock
+/playground/ios/.xcode.env.local

@@ -1,9 +1,7 @@
 #import "AppDelegate.h"
-
-#import <React/RCTBridge.h>
-#import <React/RCTBundleURLProvider.h>
-
 #import "RNNCustomViewController.h"
+#import <ReactAppDependencyProvider/RCTAppDependencyProvider.h>
+#import <React/RCTBundleURLProvider.h>
 #import <ReactNativeNavigation/ReactNativeNavigation.h>
 
 @interface AppDelegate () <RCTBridgeDelegate>
@@ -12,39 +10,45 @@
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application
-    didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-
-    self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    if (@available(iOS 13.0, *)) {
-        self.window.backgroundColor = [UIColor systemBackgroundColor];
-    } else {
-        self.window.backgroundColor = [UIColor whiteColor];
-    }
-    [self.window makeKeyWindow];
-
-    RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
-    [ReactNativeNavigation bootstrapWithBridge:bridge];
-    [ReactNativeNavigation
-        registerExternalComponent:@"RNNCustomComponent"
-                         callback:^UIViewController *(NSDictionary *props, RCTBridge *bridge) {
-                           return [[RNNCustomViewController alloc] initWithProps:props];
-                         }];
-
-    return YES;
+	didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+	[super application:application didFinishLaunchingWithOptions:launchOptions];
+	self.dependencyProvider = [RCTAppDependencyProvider new];
+	
+	
+	
+	if (self.bridgelessEnabled) {
+#ifdef RCT_NEW_ARCH_ENABLED
+		[ReactNativeNavigation
+			registerExternalHostComponent: @"RNNCustomComponent"
+							 callback:^UIViewController *(NSDictionary *props, RCTHost *host) {
+							   return [[RNNCustomViewController alloc] initWithProps:props];
+							 }];
+#endif
+	} else {
+		[ReactNativeNavigation
+			registerExternalComponent:@"RNNCustomComponent"
+							 callback:^UIViewController *(NSDictionary *props, RCTBridge *bridge) {
+							   return [[RNNCustomViewController alloc] initWithProps:props];
+							 }];
+	}
+	
+	return YES;
 }
 
 #pragma mark - RCTBridgeDelegate
 
-- (NSURL *)sourceURLForBridge:(RCTBridge *)bridge {
-#if DEBUG
-    return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
-#else
-    return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
-#endif
+- (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
+{
+  return [self bundleURL];
 }
 
-- (NSArray<id<RCTBridgeModule>> *)extraModulesForBridge:(RCTBridge *)bridge {
-    return [ReactNativeNavigation extraModulesForBridge:bridge];
+- (NSURL *)bundleURL
+{
+#if DEBUG
+  return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
+#else
+  return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+#endif
 }
 
 @end

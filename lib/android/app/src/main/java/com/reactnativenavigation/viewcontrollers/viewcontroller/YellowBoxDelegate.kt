@@ -1,6 +1,7 @@
 package com.reactnativenavigation.viewcontrollers.viewcontroller
 
 import android.content.Context
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RestrictTo
@@ -19,19 +20,26 @@ open class YellowBoxDelegate(private val context: Context, private val yellowBox
 
     private var isDestroyed = false
     private val yellowBoxViews = ArrayList<View>()
+    private val tempViews = ArrayList<View>()
 
     open fun onChildViewAdded(parent: View, child: View?) {
         if (!context.isDebug()) return
-        if (yellowBoxHelper.isYellowBox(parent, child)) onYellowBoxAdded(parent)
+        onYellowBoxAdded(parent, child)
     }
 
-    fun onYellowBoxAdded(parent: View) {
+    fun onYellowBoxAdded(parent: View?, child: View?) {
         if (isDestroyed) return
+
         this.parent = parent as ViewGroup
+
+        if (!yellowBoxHelper.isYellowBox(parent, child) && (isDestroyed || tempViews.contains(child))) return
+        parent as ViewGroup
         for (i in 1 until parent.childCount) {
             yellowBoxViews.add(parent[i])
             parent.removeView(parent[i])
-            parent.addView(View(context), i)
+            var tempView = View(context)
+            tempViews.add(tempView)
+            parent.addView(tempView, i)
         }
     }
 

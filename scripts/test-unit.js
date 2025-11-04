@@ -13,20 +13,20 @@ function run() {
 }
 
 function runAndroidUnitTests() {
-  const conf = release ? 'testReactNative68ReleaseUnitTest' : 'testReactNative68DebugUnitTest';
+  const conf = release ? 'testReleaseUnitTest' : 'testDebugUnitTest';
   if (android && process.env.JENKINS_CI) {
     const sdkmanager = '/usr/local/share/android-sdk/tools/bin/sdkmanager';
     exec.execSync(`yes | ${sdkmanager} --licenses`);
     // exec.execSync(`echo y | ${sdkmanager} --update && echo y | ${sdkmanager} --licenses`);
   }
   exec.execSync(`cd playground/android && ./gradlew ${conf}`);
+  exec.execSync(`cd playground/android && ./gradlew :react-native-navigation:pixel3aapi34DebugAndroidTest`);
 }
 
 function runIosUnitTests() {
   exec.execSync('npm run build');
   exec.execSync('npm run pod-install');
-  testTarget('playground', 'iPhone 11');
-  testTarget('playgroundIOS12', 'iPhone X', '12.4');
+  testTarget('playground', 'iPhone 13', '15.5');
 }
 
 function testTarget(scheme, device, OS = 'latest') {

@@ -1,20 +1,15 @@
 import React from 'react';
-import { NavigationComponentProps } from 'react-native-navigation';
+import { NavigationProps } from 'react-native-navigation';
 
 import Root from '../components/Root';
 import Button from '../components/Button';
 import Navigation from '../services/Navigation';
 import testIDs from '../testIDs';
 
-const {
-  HIDE_TOP_BAR_BTN,
-  SHOW_TOP_BAR_BTN,
-  SHOW_SEARCH_BAR_BTN,
-  HIDE_SEARCH_BAR_BTN,
-  TOP_BAR,
-} = testIDs;
+const { HIDE_TOP_BAR_BTN, SHOW_TOP_BAR_BTN, SHOW_SEARCH_BAR_BTN, HIDE_SEARCH_BAR_BTN, TOP_BAR } =
+  testIDs;
 
-interface Props extends NavigationComponentProps {}
+interface Props extends NavigationProps {}
 
 export default class SearchBar extends React.Component<Props> {
   static options() {

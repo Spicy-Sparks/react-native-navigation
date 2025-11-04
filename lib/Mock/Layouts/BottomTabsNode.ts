@@ -4,13 +4,16 @@ import { switchTabByIndex } from '../actions/layoutActions';
 import ParentNode from './ParentNode';
 
 export default class BottomTabsNode extends ParentNode {
-  selectedIndex: number = 0;
+  selectedIndex: number;
   constructor(layout: any, parentNode?: ParentNode) {
     super(layout, 'BottomTabs', parentNode);
+    this.selectedIndex = layout.data?.options?.bottomTabs?.currentTabIndex || 0;
   }
 
-  mergeOptions(options: Options) {
-    super.mergeOptions(options);
+  mergeOptions(_options: Options) {
+    super.mergeOptions(_options);
+
+    const { options } = this.data;
     if (options.bottomTabs?.currentTabIndex) {
       this.selectedIndex = options.bottomTabs?.currentTabIndex;
       switchTabByIndex(this, this.selectedIndex);

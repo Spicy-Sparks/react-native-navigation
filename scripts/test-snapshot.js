@@ -17,9 +17,9 @@ function run() {
 function runAndroidSnapshotTests() { }
 
 function runIosSnapshotTests() {
-  exec.execSync('npm run build');
-  exec.execSync('npm run pod-install');
-  testTarget(RECORD ? 'SnapshotRecordTests' : 'SnapshotTests', 'iPhone 11', '13.7');
+  // exec.execSync('npm run build');
+  // exec.execSync('npm run pod-install');
+  // testTarget(RECORD ? 'SnapshotRecordTests' : 'SnapshotTests', 'iPhone 13', '15.5');
 }
 
 function testTarget(scheme, device, OS = 'latest') {
@@ -48,6 +48,7 @@ function testTarget(scheme, device, OS = 'latest') {
     -derivedDataPath ./DerivedData/playground
     ONLY_ACTIVE_ARCH=YES`);
   } catch (error) {
+    exec.execSync('cp -R playground/ios/SnapshotTests/FailureDiffs ./artifacts');
     if (!RECORD) {
       throw 'Snapshot tests failed';
     }

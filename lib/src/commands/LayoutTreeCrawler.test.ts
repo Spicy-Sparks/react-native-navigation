@@ -67,11 +67,7 @@ describe('LayoutTreeCrawler', () => {
     };
     uut.crawl(node, CommandName.SetRoot);
     verify(
-      mockedOptionsProcessor.processOptions(
-        CommandName.SetRoot,
-        undefined,
-        deepEqual(passProps)
-      )
+      mockedOptionsProcessor.processOptions(CommandName.SetRoot, undefined, deepEqual(passProps))
     ).called();
   });
 });

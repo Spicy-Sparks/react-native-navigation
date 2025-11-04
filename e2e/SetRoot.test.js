@@ -34,6 +34,11 @@ describe('SetRoot', () => {
     await expect(elementById(TestIDs.LAYOUTS_TAB)).toBeNotVisible();
   });
 
+  it(':ios: set root with two children and second tab selected hides bottomTabs', async () => {
+    await elementById(TestIDs.SET_ROOT_WITH_TWO_CHILDREN_HIDES_BOTTOM_TABS_BTN).tap();
+    await expect(elementById(TestIDs.LAYOUTS_TAB)).toBeNotVisible();
+  });
+
   it('set root should not override props for component with identical id', async () => {
     await expect(elementByLabel('Two')).toBeVisible();
     await elementById(TestIDs.ROUND_BUTTON).tap();
@@ -45,4 +50,15 @@ describe('SetRoot', () => {
     await expect(elementByLabel('Times created: 1')).toBeVisible();
     await elementById(TestIDs.OK_BUTTON).tap();
   });
+});
+
+it.e2e(':ios: set root with left and right side menus - menu visibility', async () => {
+    await elementById(TestIDs.SET_ROOT_WITH_MENUS).tap();
+    await elementById(TestIDs.TOGGLE_SIDE_MENU_OPEN_MODE_BTN).tap();
+    await elementById(TestIDs.OPEN_LEFT_SIDE_MENU_BTN).tap();
+    await elementById(TestIDs.CLOSE_LEFT_SIDE_MENU_BTN).tap();
+    await expect(elementById(TestIDs.CLOSE_LEFT_SIDE_MENU_BTN)).toBeNotVisible();
+    await elementById(TestIDs.OPEN_RIGHT_SIDE_MENU_BTN).tap();
+    await elementById(TestIDs.CLOSE_RIGHT_SIDE_MENU_BTN).tap();
+    await expect(elementById(TestIDs.CLOSE_RIGHT_SIDE_MENU_BTN)).toBeNotVisible();
 });

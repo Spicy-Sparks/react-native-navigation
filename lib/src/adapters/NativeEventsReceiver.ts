@@ -1,4 +1,4 @@
-import { NativeModules, NativeEventEmitter, EventEmitter, EmitterSubscription } from 'react-native';
+import { NativeEventEmitter, EmitterSubscription } from 'react-native';
 import {
   ComponentWillAppearEvent,
   ComponentDidAppearEvent,
@@ -17,14 +17,13 @@ import {
   BottomTabLongPressedEvent,
   BottomTabPressedEvent,
 } from '../interfaces/Events';
+import RNNEventEmitter from './NativeRNNTurboEventEmitter';
 
 export class NativeEventsReceiver {
-  private emitter: EventEmitter;
+  private emitter: NativeEventEmitter;
   constructor() {
-    // NOTE: This try catch is workaround for integration tests
-    // TODO: mock NativeEventEmitter in integration tests rather done adding try catch in source code
     try {
-      this.emitter = new NativeEventEmitter(NativeModules.RNNEventEmitter);
+      this.emitter = new NativeEventEmitter(RNNEventEmitter);
     } catch (e) {
       this.emitter = ({
         addListener: () => {
@@ -32,7 +31,7 @@ export class NativeEventsReceiver {
             remove: () => undefined,
           };
         },
-      } as any) as EventEmitter;
+      } as any) as NativeEventEmitter;
     }
   }
 

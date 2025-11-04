@@ -10,7 +10,7 @@ import org.robolectric.*;
 
 import static org.assertj.core.api.Java6Assertions.*;
 
-public class EnvironmentTest extends BaseTest {
+public class EnvironmentTest extends BaseRobolectricTest {
     @Test
     public void assertJ() {
         assertThat(1 + 2).isEqualTo(3).isGreaterThan(2).isLessThan(4).isNotNegative().isPositive().isNotZero();
@@ -33,11 +33,11 @@ public class EnvironmentTest extends BaseTest {
 
     @Test
     public void androidR() {
-        assertThat(R.string.bottom_sheet_behavior).isNotZero();
+        assertThat(com.google.android.material.R.string.bottom_sheet_behavior).isNotZero();
     }
 
     @Test
     public void ableToLoadApplication() throws Exception {
-        assertThat(RuntimeEnvironment.application).isNotNull();
+        assertThat(getContext()).isNotNull();
     }
 }

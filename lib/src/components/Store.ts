@@ -24,11 +24,14 @@ export class Store {
   }
 
   getPropsForId(componentId: string) {
+    return this.pendingPropsById[componentId] || this.propsById[componentId] || {};
+  }
+
+  consumePendingProps(componentId: string) {
     if (this.pendingPropsById[componentId]) {
       this.propsById[componentId] = this.pendingPropsById[componentId];
       delete this.pendingPropsById[componentId];
     }
-    return this.propsById[componentId] || {};
   }
 
   mergeNewPropsForId(componentId: string, newProps: any) {

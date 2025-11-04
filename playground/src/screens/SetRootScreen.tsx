@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationComponentProps } from 'react-native-navigation';
+import { NavigationProps } from 'react-native-navigation';
 import Root from '../components/Root';
 import Button from '../components/Button';
 import Navigation from './../services/Navigation';
@@ -14,12 +14,14 @@ const {
   LAYOUTS_TAB,
   SET_ROOT_HIDES_BOTTOM_TABS_BTN,
   SET_ROOT_WITH_STACK_HIDES_BOTTOM_TABS_BTN,
+  SET_ROOT_WITH_TWO_CHILDREN_HIDES_BOTTOM_TABS_BTN,
   SET_ROOT_WITHOUT_STACK_HIDES_BOTTOM_TABS_BTN,
   SET_ROOT_WITH_BUTTONS,
+  SET_ROOT_WITH_MENUS,
   ROUND_BUTTON,
 } = testIDs;
 
-export default class SetRootScreen extends React.Component<NavigationComponentProps> {
+export default class SetRootScreen extends React.Component<NavigationProps> {
   static options() {
     return {
       topBar: {
@@ -49,8 +51,6 @@ export default class SetRootScreen extends React.Component<NavigationComponentPr
     };
   }
 
-  unmounted = false;
-
   render() {
     return (
       <Root componentId={this.props.componentId}>
@@ -71,6 +71,11 @@ export default class SetRootScreen extends React.Component<NavigationComponentPr
           onPress={this.setRootWithStackHidesBottomTabs}
         />
         <Button
+          label="Set Root with two children - hides bottomTabs"
+          testID={SET_ROOT_WITH_TWO_CHILDREN_HIDES_BOTTOM_TABS_BTN}
+          onPress={this.setRootWithTwoChildrenHidesBottomTabs}
+        />
+        <Button
           label="Set Root without stack - hides bottomTabs"
           testID={SET_ROOT_WITHOUT_STACK_HIDES_BOTTOM_TABS_BTN}
           onPress={this.setRootWithoutStackHidesBottomTabs}
@@ -80,18 +85,25 @@ export default class SetRootScreen extends React.Component<NavigationComponentPr
           testID={SET_ROOT_WITH_BUTTONS}
           onPress={this.setRootWithButtons}
         />
+        <Button
+          label="Set Root with left and right menus"
+          testID={SET_ROOT_WITH_MENUS}
+          onPress={this.setRootWithLeftAndRightMenus}
+        />
       </Root>
     );
   }
 
   componentWillUnmount() {
-    this.unmounted = true;
+    logLifecycleEvent({
+      text: `component unmounted`,
+    });
   }
 
   setSingleRoot = async () => {
     await this.setRoot();
     logLifecycleEvent({
-      text: `setRoot complete - previous root is${this.unmounted ? '' : ' not'} unmounted`,
+      text: `setRoot complete`,
     });
   };
 
@@ -191,6 +203,52 @@ export default class SetRootScreen extends React.Component<NavigationComponentPr
       },
     });
 
+  setRootWithTwoChildrenHidesBottomTabs = async () =>
+    await Navigation.setRoot({
+      root: {
+        bottomTabs: {
+          children: [
+            {
+              component: {
+                name: Screens.Pushed,
+              },
+            },
+            {
+              stack: {
+                id: 'stack',
+                children: [
+                  {
+                    component: {
+                      id: 'component',
+                      name: Screens.Pushed,
+                    },
+                  },
+                  {
+                    component: {
+                      id: 'component2',
+                      name: Screens.Pushed,
+                      options: {
+                        bottomTabs: {
+                          visible: false,
+                          animate: false,
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          options: {
+            bottomTabs: {
+              testID: LAYOUTS_TAB,
+              currentTabIndex: 1,
+            },
+          },
+        },
+      },
+    });
+
   setRootWithoutStackHidesBottomTabs = async () =>
     await Navigation.setRoot({
       root: {
@@ -259,6 +317,55 @@ export default class SetRootScreen extends React.Component<NavigationComponentPr
               },
             },
           ],
+        },
+      },
+    });
+
+  setRootWithLeftAndRightMenus = () =>
+    Navigation.setRoot({
+      root: {
+        sideMenu: {
+          left: {
+            component: {
+              id: 'sideMenu',
+              name: Screens.SideMenuLeft,
+            },
+          },
+          right: {
+            component: {
+              id: 'sideMenu',
+              name: Screens.SideMenuRight,
+            },
+          },
+          center: {
+            stack: {
+              children: [
+                {
+                  component: {
+                    name: Screens.SideMenuCenter,
+                    id: 'SideMenuCenter',
+                    options: {
+                      animations: {
+                        setRoot: {
+                          waitForRender: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          options: {
+            sideMenu: {
+              left: {
+                openMode: 'aboveContent',
+              },
+              right: {
+                openMode: 'aboveContent',
+              },
+            },
+          },
         },
       },
     });

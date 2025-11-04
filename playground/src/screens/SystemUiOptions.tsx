@@ -1,12 +1,13 @@
 import React from 'react';
-import { StyleSheet, Image, View, Text, TextInput } from 'react-native';
-import { ColorPalette, Switch } from 'react-native-ui-lib';
-import { NavigationComponentProps, Options } from 'react-native-navigation';
+import { StyleSheet, Image, View, Text, TextInput, Switch } from 'react-native';
+import { NavigationProps, Options } from 'react-native-navigation';
 import Root from '../components/Root';
 import Button from '../components/Button';
 import Navigation from '../services/Navigation';
 import Screens from './Screens';
 import testIDs from '../testIDs';
+import ColorPicker, { Swatches } from 'reanimated-color-picker';
+import { returnedResults } from 'reanimated-color-picker/lib/src/types';
 
 interface State {
   statusBarVisible: boolean;
@@ -16,6 +17,7 @@ interface State {
   drawBehind: boolean;
   selectedColor: string;
 }
+
 const colors = [
   '#000000',
   '#00AAAF00',
@@ -29,7 +31,7 @@ const colors = [
   '#8B1079',
 ];
 
-export default class SystemUiOptions extends React.Component<NavigationComponentProps, State> {
+export default class SystemUiOptions extends React.Component<NavigationProps, State> {
   static options(): Options {
     return {
       statusBar: {
@@ -58,7 +60,7 @@ export default class SystemUiOptions extends React.Component<NavigationComponent
     };
   }
 
-  constructor(props: Readonly<NavigationComponentProps>) {
+  constructor(props: Readonly<NavigationProps>) {
     super(props);
     this.state = {
       navigationBarVisible: true,
@@ -77,11 +79,9 @@ export default class SystemUiOptions extends React.Component<NavigationComponent
           <Image style={style.image} source={require('../../img/city.png')} fadeDuration={0} />
 
           <Text>Navigation & Status Bar Color</Text>
-          <ColorPalette
-            value={this.state.selectedColor}
-            onValueChange={this.onPaletteValueChange}
-            colors={colors}
-          />
+          <ColorPicker value={this.state.selectedColor} onChange={this.onPaletteValueChange}>
+            <Swatches colors={colors} />
+          </ColorPicker>
           <View style={style.translucentSwitch}>
             <Text>Translucent: </Text>
             <Switch value={this.state.translucent} onValueChange={this.onTranslucentChanged} />
@@ -133,16 +133,18 @@ export default class SystemUiOptions extends React.Component<NavigationComponent
       </View>
     );
   }
-  onPaletteValueChange = (value: string, _: object) => {
+
+  onPaletteValueChange = (value: returnedResults) => {
+    const color = value.rgb;
     Navigation.mergeOptions(this.props.componentId, {
       statusBar: {
-        backgroundColor: value,
+        backgroundColor: color,
       },
       navigationBar: {
-        backgroundColor: value,
+        backgroundColor: color,
       },
     });
-    this.setState({ selectedColor: value });
+    this.setState({ selectedColor: color });
   };
 
   onTranslucentChanged = (value: boolean) => {

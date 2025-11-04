@@ -71,7 +71,7 @@ class TitleAndButtonsContainer(context: Context) : ViewGroup(context) {
         component?.layoutDirection = layoutDirection
         titleSubTitleBar.layoutDirection = layoutDirection
         rightButtonBar.layoutDirection = layoutDirection
-        leftButtonBar.layoutDirection = if(isRTL()) View.LAYOUT_DIRECTION_LTR else View.LAYOUT_DIRECTION_RTL
+        leftButtonBar.layoutDirection = if (isRTL()) View.LAYOUT_DIRECTION_RTL else layoutDirection
     }
 
     fun setSubTitleTextAlignment(alignment: Alignment) = titleSubTitleBar.setSubTitleAlignment(alignment)
@@ -97,6 +97,10 @@ class TitleAndButtonsContainer(context: Context) : ViewGroup(context) {
     fun clearTitle() {
         titleSubTitleBar.clear()
         clearComponent()
+    }
+
+    fun setTestId(testId: String) {
+        titleSubTitleBar.setTestId(testId)
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
@@ -153,6 +157,10 @@ class TitleAndButtonsContainer(context: Context) : ViewGroup(context) {
         val isCenter = titleComponentAlignment == Alignment.Center
         val titleHeightMeasureSpec = MeasureSpec.makeMeasureSpec(containerHeight, MeasureSpec.AT_MOST)
         val titleWidthMeasureSpec = makeTitleAtMostWidthMeasureSpec(containerWidth, rightBarWidth, leftBarWidth, isCenter)
+        if (titleComponent is TitleBarReactView) {
+            titleComponent.centered = isCenter
+        }
+
         titleComponent.measure(titleWidthMeasureSpec, titleHeightMeasureSpec)
     }
 

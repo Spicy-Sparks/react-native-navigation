@@ -1,11 +1,24 @@
-import React from 'react';
-import { NavigationComponentProps, Options } from 'react-native-navigation';
+import React, { Component } from 'react';
+import { Text } from 'react-native';
+import { NavigationProps, Options } from 'react-native-navigation';
+
 import Root from '../components/Root';
 import Button from '../components/Button';
 import Navigation from './../services/Navigation';
 import Screens from './Screens';
 import { component } from '../commons/Layouts';
 import testIDs from '../testIDs';
+import bottomTabsStruct from './BottomTabsLayoutStructure';
+
+export class MountedBottomTabScreensState {
+  static mountedBottomTabScreens: string[] = [];
+  static callback: (mountedBottomTabScreens: string[]) => void = () => {};
+
+  static addScreen(screen: string) {
+    this.mountedBottomTabScreens.push(screen);
+    this.callback(this.mountedBottomTabScreens);
+  }
+}
 
 const {
   SWITCH_TAB_BY_INDEX_BTN,
@@ -15,10 +28,19 @@ const {
   HIDE_TABS_BTN,
   SHOW_TABS_BTN,
   HIDE_TABS_PUSH_BTN,
+  STYLIZE_TABS_BTN,
   FIRST_TAB_BAR_BUTTON,
+  MOUNTED_SCREENS_TEXT,
+  SCREEN_ROOT,
+  SET_ROOT_BTN,
+  BOTTOM_TABS,
 } = testIDs;
 
-export default class FirstBottomTabScreen extends React.Component<NavigationComponentProps> {
+interface NavigationState {
+  mountedBottomTabScreens: string[];
+}
+
+export default class FirstBottomTabScreen extends Component<NavigationProps, NavigationState> {
   static options(): Options {
     return {
       layout: {
@@ -38,6 +60,19 @@ export default class FirstBottomTabScreen extends React.Component<NavigationComp
     };
   }
 
+  constructor(props: NavigationProps) {
+    super(props);
+    this.state = { mountedBottomTabScreens: [] };
+
+    MountedBottomTabScreensState.callback = (mountedBottomTabScreens: string[]) => {
+      this.setState({ mountedBottomTabScreens: mountedBottomTabScreens });
+    };
+  }
+
+  componentDidMount() {
+    MountedBottomTabScreensState.addScreen('FirstBottomTabScreen');
+  }
+
   badgeVisible = true;
   bottomTabPressedListener = Navigation.events().registerBottomTabPressedListener((event) => {
     if (event.tabIndex == 2) {
@@ -47,7 +82,7 @@ export default class FirstBottomTabScreen extends React.Component<NavigationComp
 
   render() {
     return (
-      <Root componentId={this.props.componentId}>
+      <Root componentId={this.props.componentId} testID={SCREEN_ROOT}>
         <Button
           label="Switch Tab by Index"
           testID={SWITCH_TAB_BY_INDEX_BTN}
@@ -71,6 +106,12 @@ export default class FirstBottomTabScreen extends React.Component<NavigationComp
         />
         <Button label="Push" onPress={this.push} />
         <Button label="Add border and shadow" onPress={this.modifyBottomTabs} />
+        <Button label="Stylize" testID={STYLIZE_TABS_BTN} onPress={this.stylizeBottomTabs} />
+        <Button label="Set Styled Root" testID={SET_ROOT_BTN} onPress={this.setStylizedRoot} />
+
+        <Text testID={MOUNTED_SCREENS_TEXT}>
+          Mounted screens: {this.state.mountedBottomTabScreens.join(', ')}
+        </Text>
       </Root>
     );
   }
@@ -88,6 +129,42 @@ export default class FirstBottomTabScreen extends React.Component<NavigationComp
           color: '#65C888',
           radius: 20,
           opacity: 0.8,
+        },
+      },
+    });
+  };
+
+  stylizeBottomTabs = () => {
+    Navigation.mergeOptions(this.props.componentId, {
+      bottomTabs: {
+        drawBehind: true,
+        translucent: true,
+        blurRadius: 2.0,
+        layoutStyle: 'compact',
+        bottomMargin: 15,
+        cornerRadius: 15,
+        elevation: 1,
+        backgroundColor: 'rgba(255, 182, 193, 0.25)',
+      },
+    });
+  };
+
+  setStylizedRoot = () => {
+    Navigation.setRoot({
+      bottomTabs: {
+        children: [...bottomTabsStruct.children],
+        options: {
+          bottomTabs: {
+            testID: BOTTOM_TABS,
+            drawBehind: true,
+            translucent: true,
+            blurRadius: 2.0,
+            layoutStyle: 'compact',
+            bottomMargin: 15,
+            cornerRadius: 15,
+            elevation: 1,
+            backgroundColor: 'rgba(119,202,212,0.56)',
+          },
         },
       },
     });

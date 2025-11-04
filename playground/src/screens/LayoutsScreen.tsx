@@ -1,9 +1,10 @@
 import React from 'react';
+import { Text } from 'react-native';
 import {
   Options,
   OptionsModalPresentationStyle,
   NavigationComponent,
-  NavigationComponentProps,
+  NavigationProps,
 } from 'react-native-navigation';
 
 import Root from '../components/Root';
@@ -12,7 +13,7 @@ import testIDs from '../testIDs';
 import Screens from './Screens';
 import Navigation from '../services/Navigation';
 import { stack } from '../commons/Layouts';
-import { Text } from 'react-native';
+import bottomTabsStruct from './BottomTabsLayoutStructure';
 
 const {
   WELCOME_SCREEN_HEADER,
@@ -25,19 +26,22 @@ const {
 } = testIDs;
 
 interface State {
+  componentWillAppear: boolean;
   componentDidAppear: boolean;
 }
 
-export default class LayoutsScreen extends NavigationComponent<NavigationComponentProps, State> {
-  constructor(props: NavigationComponentProps) {
+export default class LayoutsScreen extends NavigationComponent<NavigationProps, State> {
+  constructor(props: NavigationProps) {
     super(props);
     Navigation.events().bindComponent(this);
     this.state = {
+      componentWillAppear: false,
       componentDidAppear: false,
     };
   }
   componentWillAppear() {
     console.log('componentWillAppear:', this.props.componentId);
+    this.setState(previousState => ({ ...previousState, componentWillAppear: true }));
   }
 
   componentDidDisappear() {
@@ -46,7 +50,7 @@ export default class LayoutsScreen extends NavigationComponent<NavigationCompone
 
   componentDidAppear() {
     console.log('componentDidAppear:', this.props.componentId);
-    this.setState({ componentDidAppear: true });
+    this.setState(previousState => ({ ...previousState, componentDidAppear: true }));
   }
 
   static options(): Options {
@@ -79,6 +83,7 @@ export default class LayoutsScreen extends NavigationComponent<NavigationCompone
           platform="ios"
           onPress={this.splitView}
         />
+        <Text>{this.state.componentWillAppear && 'componentWillAppear'}</Text>
         <Text>{this.state.componentDidAppear && 'componentDidAppear'}</Text>
       </Root>
     );
@@ -89,29 +94,7 @@ export default class LayoutsScreen extends NavigationComponent<NavigationCompone
   bottomTabs = () => {
     Navigation.showModal({
       bottomTabs: {
-        children: [
-          stack(Screens.FirstBottomTabsScreen),
-          stack(
-            {
-              component: {
-                name: Screens.SecondBottomTabsScreen,
-              },
-            },
-            'SecondTab'
-          ),
-          {
-            component: {
-              name: Screens.Pushed,
-              options: {
-                bottomTab: {
-                  selectTabOnPress: false,
-                  text: 'Tab 3',
-                  testID: testIDs.THIRD_TAB_BAR_BTN,
-                },
-              },
-            },
-          },
-        ],
+        children: [...bottomTabsStruct.children],
         options: {
           hardwareBackButton: {
             bottomTabsOnPress: 'previous',

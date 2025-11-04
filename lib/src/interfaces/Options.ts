@@ -34,8 +34,11 @@ type FontWeight =
   | '900'
   | FontWeightIOS;
 export type LayoutOrientation =
+  | 'all'
+  | 'default'
   | 'portrait'
   | 'landscape'
+  | 'upsideDown'
   | 'sensor'
   | 'sensorLandscape'
   | 'sensorPortrait';
@@ -852,7 +855,9 @@ export interface OptionsBottomTabs {
    */
   drawBehind?: boolean;
   /**
-   * Set a background color for the bottom tabs
+   * Set a background color for the bottom tabs.<br/>
+   * On Android - also applicable when translucence is applied, but a semi-transparent
+   * color should be used (e.g. `rgba(255, 0, 0, 0.25)`).
    */
   backgroundColor?: Color;
   /**
@@ -868,10 +873,42 @@ export interface OptionsBottomTabs {
    */
   barStyle?: 'default' | 'black';
   /**
-   * Allows the Bottom Tabs to be translucent (blurred)
-   * #### (iOS specific)
+   * Control the way the bottom tabs are laid out.
+   * - `stretch`: Fill the entire width of the screen.
+   * - `compact`: Occupy the minimum width needed to hold tab buttons. Recommended for
+   * usage in conjunction with `drawBehind: true`.
+   *
+   * #### (Android specific)
+   * @default 'stretch'
+   */
+  layoutStyle?: 'stretch' | 'compact';
+  /**
+   * Specify a corner-radius (in dip) in order to apply round corners to the tabs container.<br/>
+   * Mainly suitable when used in conjunction with `layoutStyle: 'compact'`
+   * #### (Android specific)
+   */
+  cornerRadius?: AndroidDensityNumber;
+  /**
+   * Bottom-margin to set in order to apply a "hover" effect.
+   * Works best when used in conjunction with `layoutStyle: 'compact'` and `drawBehind: true`.
+   * #### (Android specific)
+   */
+  bottomMargin?: AndroidDensityNumber;
+  /**
+   * Allows the bottom tabs to be translucent (blurred). Doesn't necessarily play
+   * nice with shadow effects on Android.
+   * #### Android: experimental, turn on using native toggle `TAB_BAR_TRANSLUCENCE`.
    */
   translucent?: boolean;
+  /**
+   * Set a custom radius to be used in the blur effect. Higher is blurrier, but
+   * also more CPU-intensive.<br/>
+   * Note: The blurring is performed following a bitmap downscale of x4.0, so
+   * ultimately the actual radius is (4*blurRadius).
+   * #### (Android specific)
+   * @defaultValue 1.0
+   */
+  blurRadius?: AndroidDensityNumber;
   /**
    * Hide the top line of the Tab Bar
    * #### (iOS specific)
@@ -1075,10 +1112,19 @@ export interface SideMenuSide {
   height?: number;
   /**
    * Stretch sideMenu contents when opened past the width
+   *
+   * **Not applicable when `openMode` is `aboveContent`**
+   *
    * #### (iOS specific)
    * @default true
    */
   shouldStretchDrawer?: boolean;
+  /**
+   * Configure the opening mode of the side menu
+   * #### (iOS specific)
+   * @default 'pushContent'
+   */
+  openMode?: 'pushContent'|'aboveContent';
 }
 
 export interface OptionsSideMenu {
@@ -1264,11 +1310,36 @@ export interface IconInsets {
   right?: number;
 }
 
+export interface ColorAnimationOptions {
+  /**
+   * Color duration time; Default is as determined by the OS
+   */
+  duration?: number;
+}
+
 export interface ViewAnimationOptions extends ScreenAnimationOptions {
   /**
    * ID of the Top Bar we want to animate
    */
   id?: string;
+}
+
+export interface TopBarAnimationOptions extends ViewAnimationOptions {
+  /**
+   * Animation of the top-bar's background color, in case the top-bar background color
+   * has been explicitly specified.
+   *
+   * Applicable only in transition of screens with color (non-component) backgrounds.
+   */
+  bkgColor?: ColorAnimationOptions;
+}
+
+export interface StatusBarAnimationOptions extends ViewAnimationOptions {
+  /**
+   * Animation of the status-bar's background color, in case its background color
+   * has been explicitly specified.
+   */
+  bkgColor?: ColorAnimationOptions;
 }
 
 export interface EnterExitAnimationOptions {
@@ -1329,10 +1400,20 @@ export interface StackAnimationOptions {
    * Configure animations for the top bar
    */
   topBar?:
-    | ViewAnimationOptions
+    | TopBarAnimationOptions
     | {
-        enter?: ViewAnimationOptions;
-        exit?: ViewAnimationOptions;
+        enter?: TopBarAnimationOptions;
+        exit?: TopBarAnimationOptions;
+      };
+  /**
+   * Configure animations for the status bar (typically aligned
+   * with the top-bar's)
+   */
+  statusBar?:
+    | StatusBarAnimationOptions
+    | {
+        enter?: StatusBarAnimationOptions;
+        exit?: StatusBarAnimationOptions;
       };
   /**
    * Configure animations for the bottom tabs

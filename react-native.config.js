@@ -5,12 +5,8 @@ module.exports = {
       android: {
         sourceDir: './lib/android/app/',
         packageImportPath: 'import com.reactnativenavigation.react.NavigationPackage;',
-        packageInstance: 'new NavigationPackage(reactNativeHost)',
+        packageInstance: 'new NavigationPackage()',
       },
-    },
-    assets: [],
-    hooks: {
-      postlink: 'node node_modules/react-native-navigation/autolink/postlink/run',
     },
   },
   project: {

@@ -1,13 +1,16 @@
 package com.reactnativenavigation;
 
-import android.app.*;
+import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.facebook.react.ReactHost;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
+import com.facebook.react.defaults.DefaultReactHost;
 
 import java.util.Collections;
 import java.util.List;
+
 
 public class TestApplication extends Application implements ReactApplication {
     private final ReactNativeHost host = new ReactNativeHost(this) {
@@ -25,11 +28,16 @@ public class TestApplication extends Application implements ReactApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        setTheme(R.style.Theme_AppCompat);
+        setTheme(androidx.appcompat.R.style.Theme_AppCompat);
     }
 
     @Override
     public ReactNativeHost getReactNativeHost() {
         return host;
+    }
+
+    @Override
+    public ReactHost getReactHost() {
+        return DefaultReactHost.getDefaultReactHost(this, getReactNativeHost());
     }
 }
